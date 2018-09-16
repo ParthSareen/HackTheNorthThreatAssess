@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
-import requests
 import pickle
+import requests
 
 face_cascade = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_alt2.xml')
 recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -11,10 +11,12 @@ with open("labels.pickle", "rb") as f:
     og_labels = pickle.load(f)
     labels = {v:k for k, v in og_labels.items()}
 
-url = "http://10.21.131.4:8080/shot.jpg"
+#cap = cv2.VideoCapture(0)
+url = "http://10.21.12.195:8080/shot.jpg"#changes almost everytime you use it
 
 while (True):
     #capturing data frame by frame
+    #ret, frame = cap.read()
     frames_resp = requests.get(url)
     frame_arr = np.array(bytearray(frames_resp.content), dtype=np.uint8)
     frame = cv2.imdecode(frame_arr, -1)
@@ -25,22 +27,34 @@ while (True):
         roi_color = frame[y:y+h, x:x+w] #(ycord_start-height, ycord_end-height)
 
         id, conf = recognizer.predict(roi_gray)
-        if conf>= 45 and conf <=85:
+        if labels[id]== "peter-dinklage" and conf >=85:
             print(id)
-            prtin(labels[id])
-        img_item = "my-image.png" #creates image for testing
+            print(labels[id])
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            name = "peter dinklage is wanted"
+            color = (255,255,255)
+            box_color = (0, 0, 255)
+            stroke = 1
+            cv2.putText(frame, name, (x,y), font, 1, color, stroke, cv2.LINE_AA)
+            end_cord_x = x + w
+            end_cord_y = y + h
+            cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), box_color, stroke)
+        else:
+            pass
+
+        img_item = "7.png" #creates image for testing
 
         #recognize? deep learning model predict keras tensorflow pytorch scikit learn
 
 
-        cv2.imwrite(img_item, roi_gray)
-        #print(x,y,w,h)
+        cv2.imwrite(img_item, roi_color)
+        print(x,y,w,h)
 
-        color = (0, 0, 255) #BGR
-        stroke = 2
-        end_cord_x = x + w
-        end_cord_y = y + h
-        cv2.rectangle(frame, (x, y),(end_cord_x, end_cord_y), color, stroke)
+        #color = (0, 0, 255) #BGR
+        #stroke = 2
+        #end_cord_x = x + w
+        #end_cord_y = y + h
+        #cv2.rectangle(frame, (x, y),(end_cord_x, end_cord_y), color, stroke)
 
     #display frame
     cv2.imshow('frame',frame)
@@ -48,4 +62,5 @@ while (True):
         break
 
 #when proccesses are done executing, release VideoCapture
+#cap.release()
 cv2.destroyAllWindows()
