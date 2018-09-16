@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import requests
 import pickle
 
 face_cascade = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_alt2.xml')
@@ -10,11 +11,13 @@ with open("labels.pickle", "rb") as f:
     og_labels = pickle.load(f)
     labels = {v:k for k, v in og_labels.items()}
 
-cap = cv2.VideoCapture(0)
+url = "http://10.21.131.4:8080/shot.jpg"
 
 while (True):
     #capturing data frame by frame
-    ret, frame = cap.read()
+    frames_resp = requests.get(url)
+    frame_arr = np.array(bytearray(frames_resp.content), dtype=np.uint8)
+    frame = cv2.imdecode(frame_arr, -1)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor = 1.5, minNeighbors = 5)
     for (x, y, w, h) in faces:
@@ -45,5 +48,4 @@ while (True):
         break
 
 #when proccesses are done executing, release VideoCapture
-cap.release()
 cv2.destroyAllWindows()
