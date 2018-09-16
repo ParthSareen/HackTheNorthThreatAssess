@@ -12,7 +12,7 @@ with open("labels.pickle", "rb") as f:
     labels = {v:k for k, v in og_labels.items()}
 
 #cap = cv2.VideoCapture(0)
-url = "http://10.21.12.195:8080/shot.jpg"#changes almost everytime you use it
+url = "http://10.21.131.4:8080/shot.jpg"#changes almost everytime you use it
 
 while (True):
     #capturing data frame by frame
